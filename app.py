@@ -1,55 +1,66 @@
 import streamlit as st
+
 st.title("My mini library app")
-if books not in st.session_state:
-  st.session_state.books = []
-  st.header("Add book")
-  title = st.text_input("title")
-  author = st.text_imput("Author")
-  price = st.text_imput("Price", min_value=0.0)
-  if st.button("Add book"):
-    book = { "title" : title,
-            "author" : author,
-            "price" : price}
-    st.sessipn_state.books.appened(book)
-    st.success("The book is added")
+
+# Инициализация на сесията - името на ключа трябва да е в кавички
+if "books" not in st.session_state:
+    st.session_state.books = []
+
+st.header("Add book")
+title = st.text_input("Title")
+author = st.text_input("Author")
+# Използваме number_input за цена, за да можем да сравняваме числа
+price = st.number_input("Price", min_value=0.0, step=0.01)
+
+if st.button("Add book"):
+    if title and author:
+        book = {
+            "title": title,
+            "author": author,
+            "price": price
+        }
+        st.session_state.books.append(book)
+        st.success(f"Книгата '{title}' беше добавена успешно!")
+    else:
+        st.error("Моля, попълнете заглавие и автор.")
 
 if st.button("Show all books"):
-  if len(st.session_state.books) == 0:
-    st.write("No added books")
-  else:
-    for book in st.session_state.books:
-      st.write("Tite", book["title"])
-      st.write("Author", book["author"])
-      st.write("Price", book["price"])
-      st.write("--------------------")
+    if not st.session_state.books:
+        st.write("No added books")
+    else:
+        for book in st.session_state.books:
+            st.write(f"**Title:** {book['title']} | **Author:** {book['author']} | **Price:** {book['price']:.2f}")
+            st.write("---")
 
-st.header("Serch by author")
+st.header("Search by author")
 search_author = st.text_input("Enter Author name:")
-if st.button("Serch by author"):
-  found = False
-for book in st.session_state.books:
-  if book["author"] == search_author:
-    st.write(book)
-    found = true
-  in found = False:
-  st.write("There are no books from this author")
+if st.button("Search by author"):
+    found = False
+    for book in st.session_state.books:
+        if search_author.lower() in book["author"].lower():
+            st.write(book)
+            found = True
+    if not found:
+        st.write("There are no books from this author")
+
 st.header("Search by Title")
 search_title = st.text_input("Enter title")
-if st.button("Search by Title):
-             found = False
-for book in st.session_state.books:
-  if book["title"] == search_title:
-    st.write(book)
-    found = true
-  in found = False:
-  st.write("There are no books from this title")
-if st.button ("Show the cheapest book"):
-  if len (st.session_state.books) == 0:
-    st.write("There's no book")
-  else:
-    cheapest = st.session-state.books[0]
-for book in st.session_state.books:
-  if book["price"] < cheapest["price"]:
-    cheapest = book
-st.write("The cheapest book")
-st.write(cheapest)
+if st.button("Search by Title"):
+    found = False
+    for book in st.session_state.books:
+        if search_title.lower() in book["title"].lower():
+            st.write(book)
+            found = True
+    if not found:
+        st.write("There are no books with this title")
+
+if st.button("Show the cheapest book"):
+    if not st.session_state.books:
+        st.write("There are no books in the library.")
+    else:
+        # Намиране на най-евтината книга чрез функцията min
+        cheapest = min(st.session_state.books, key=lambda x: x['price'])
+        st.write("### The cheapest book:")
+        st.write(f"Title: {cheapest['title']}")
+        st.write(f"Author: {cheapest['author']}")
+        st.write(f"Price: {cheapest['price']:.2f}")
